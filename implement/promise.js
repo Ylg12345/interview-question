@@ -1,9 +1,7 @@
-
 class myPromise {
-
   static PENDING = 'PENDING';
   static FULFILLED = 'FULFILLED';
-  static REJECITED = 'REJECITED';
+  static REJECTED = 'REJECTED';
 
   constructor(func) {
     this.promiseState = myPromise.PENDING;
@@ -20,159 +18,249 @@ class myPromise {
 
   resolve(result) {
     if (this.promiseState === myPromise.PENDING) {
-      this.promiseState = myPromise.FULFILLED;
-      this.promiseResult = result;
-
-      this.onFulfilledCallbacks.forEach(callback => {
-        callback(result);
+      setTimeout(() => {
+        this.promiseState = myPromise.FULFILLED;
+        this.promiseResult = result;
+  
+        this.onFulfilledCallbacks.forEach(callback => {
+          callback(result);
+        });
       })
     }
   }
 
-  reject(result) {
+  reject(reason) {
     if (this.promiseState === myPromise.PENDING) {
-      this.promiseState = myPromise.REJECITED;
-      this.promiseResult = result;
-
-      this.onRejectedCallbacks.forEach(callback => {
-        callback(result);
-      })
+      setTimeout(() => {
+        this.promiseState = myPromise.REJECTED;
+        this.promiseResult = reason;
+  
+        this.onRejectedCallbacks.forEach(callback => {
+          callback(reason);
+        })
+      });
     }
   }
+
+  /**
+   * [注册fulfilled状态/rejected状态对应的回调函数] 
+   * @param {function} onFulfilled  fulfilled状态时 执行的函数
+   * @param {function} onRejected  rejected状态时 执行的函数 
+   * @returns {function} newPromsie  返回一个新的promise对象
+   */
 
   then(onFulfilled, onRejected) {
-    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value;
-    onRejected = typeof onRejected === 'function' ? onRejected : reason => {
-      throw reason;
-    };
-
-    if (this.promiseState === myPromise.PENDING) {
-       this.onFulfilledCallbacks.push(() => {
+    const promise2 = new myPromise((resolve, reject) => {
+      if(this.promiseState === myPromise.FULFILLED) {
         setTimeout(() => {
-          onFulfilled(this.promiseResult);
+          try {
+            if(typeof onFulfilled !== 'function') {
+              resolve(this.promiseResult);
+            } else {
+              let x = onFulfilled(this.promiseResult);
+              resolvePromise(promise2, x, resolve, reject);
+            }
+          } catch (error) {
+            reject(error);
+          }
         })
-       });
-       this.onRejectedCallbacks.push(() => {
+      } else if(this.promiseState === myPromise.REJECTED) {
         setTimeout(() => {
-          onRejected(this.promiseResult);
+          try {
+            if(typeof onRejected !== 'function') {
+              reject(this.promiseResult);
+            } else {
+              let x = onRejected(this.promiseResult);
+              resolvePromise(promise2, x, resolve, reject);
+            }
+          } catch (error) {
+            reject(error);
+          }
         })
-       });
+      } else if(this.promiseState === myPromise.PENDING) {
+        this.onFulfilledCallbacks.push(() => {
+          try {
+            if(typeof onFulfilled !== 'function') {
+              resolve(this.promiseResult);
+            } else {
+              let x = onFulfilled(this.promiseResult);
+              resolvePromise(promise2, x, resolve, reject);
+            }
+          } catch (error) {
+            reject(error);
+          }
+        });
+        this.onRejectedCallbacks.push(() => {
+          setTimeout(() => {
+            try {
+              if(typeof onRejected !== 'function') {
+                reject(this.promiseResult);
+              } else {
+                let x = onRejected(this.promiseResult);
+                resolvePromise(promise2, x, resolve, reject);
+              }
+            } catch (error) {
+              reject(error);
+            }
+          })
+        });
       }
-      
+    });
 
-    if(this.promiseState === myPromise.FULFILLED) {
-      setTimeout(() => {
-        onFulfilled(this.promiseResult);
+    return promise2;
+  }
+
+  catch (onRejected) {
+    return this.then(undefined, onRejected)
+  }
+
+  finally(callBack) {
+    return this.then(callBack, callBack)
+  }
+
+  /**
+   * @param {[type]} value 要解析为 Promise 对象的值 
+   */
+  static resolve(value) {
+    if(value instanceof myPromise) {
+      return value;
+    } else if(value instanceof Object && 'then' in value) {
+      return new myPromise((resolve, reject) => {
+        value.then(resolve, reject);
       })
     }
 
-    if(this.promiseState === myPromise.REJECITED) {
-      setTimeout(() => {
-        onRejected(this.promiseResult);
+    return new myPromise((resolve) => {
+      resolve(value);
+    })
+  }
+
+  static reject(reason) {
+    return new myPromise((resolve, reject) => {
+      reject(reason);
+    })
+  }
+
+  static all(iterator) {
+    const isIterable = iterableCheck(iterator);
+    if(isIterable) {
+      const result = [];
+      let count = 0;
+      iterator = Array.from(iterator);
+      return new myPromise((resolve, reject) => {
+        if(!iterator.length) {
+          resolve([])
+        }
+  
+        for (let i = 0; i < iterator.length; i++) {
+          myPromise.resolve(iterator[i]).then((res) => {
+            result[i] = res;
+            count++;
+            if (count === iterator.length) {
+              resolve(result);
+            }
+          }).catch(err => {
+            reject(err)
+          });
+        }
       })
+    } else {
+      throw new TypeError('Argument is not iterable');
+    }
+  }
+
+  static race(iterator) {
+    const isIterable = iterableCheck(iterator);
+    if(isIterable) {
+      return new myPromise((resolve, reject) => {
+        for(let i = 0; i < iterator.length; i++) {
+          myPromise.resolve(iterator[i]).then(res => {
+            resolve(res);
+          })
+        }
+      })
+    } else {
+      throw new TypeError('Argument is not iterable');
     }
   }
 }
 
-console.log(1);
-let promise1 = new myPromise((resolve, reject) => {
-  console.log(2);
+function iterableCheck(iterator) {
+  const type = Object.prototype.toString.call(iterator).slice(8, -1).toLocaleLowerCase();
+  const isIterable = (
+    ((typeof iterator === "object" && iterator !== null) ||
+      typeof iterator === "string") &&
+    typeof iterator[Symbol.iterator] === "function"
+  );
 
-  setTimeout(() => {
-    resolve('这次一定');
-    console.log(4);
-  });
-})
-promise1.then(
-  result => {
-    console.log('fulfilled:', result);
-  },
-  reason => {
-    console.log('rejected:', reason)
+  return isIterable;
+}
+
+/**
+ * 对 resolve()、reject() 进行改造增强 针对 resolve() 和 reject() 中不同值情况 进行处理
+ * @param  {promise} promise2 promise1.then 方法返回的新的 promise 对象
+ * @param  {[type]} x         promise1 中 onFulfilled 或 onRejected 的返回值
+ * @param  {[type]} resolve   promise2 的 resolve 方法
+ * @param  {[type]} reject    promise2 的 reject 方法
+ */
+function resolvePromise(promise2, x, resolve, reject) {
+  if(x === promise2) {
+    throw new TypeError('Chaining cycle detected for promise');
   }
-)
-console.log(3);
 
-// function all(iterator) {
-//   const type = Object.prototype.toString.call(iterator).slice(8, -1).toLocaleLowerCase();
-//   const isIterable = (
-//     ((typeof iterator === "object" && iterator !== null) ||
-//       typeof iterator === "string") &&
-//     typeof iterator[Symbol.iterator] === "function"
-//   );
+  if(x instanceof myPromise) {
+    x.then(
+      y => {
+      resolvePromise(promise2, y, resolve, reject);
+      },
+      reject
+    );
+  } else if(x !== null && ((typeof x === 'object' || (typeof x === 'function')))) {
+    let then;
+    try {
+      then = x.then;
+    } catch(error) {
+      return reject(error);
+    }
 
-//   if(isIterable) {
-//     const result = [];
-//     let count = 0;
-//     iterator = Array.from(iterator);
-//     return new Promise((resolve, reject) => {
-//       if(!iterator.length) {
-//         resolve([])
-//       }
+    if(typeof then === 'function') {
+      let called = false;
+      try {
+        then.call(
+            x,
+            y => {
+                if (called) return;
+                called = true;
+                resolvePromise(promise2, y, resolve, reject);
+            },
+            r => {
+                if (called) return;
+                called = true;
+                reject(r);
+            }
+        )
+      }catch (error) {
+        if (called) return;
+        called = true;
+        reject(error);
+      }
+    } else {
+      resolve(x);
+    }
+  } else {
+    return resolve(x);
+  }
+}
 
-//       for (let i = 0; i < iterator.length; i++) {
-//         Promise.resolve(iterator[i]).then((res) => {
-//           result[i] = res;
-//           count++;
-//           if (count === iterator.length) {
-//             resolve(result);
-//           }
-//         }).catch(err => {
-//           reject(err)
-//         });
-//       }
-//     })
-//   } else {
-//     throw new TypeError(`${type} ${iterator} is not iterable`);
-//   }
-// }
+myPromise.deferred = function() {
+  let result = {};
 
-// function race(iterator) {
-//   return new Promise((resolve, reject) => {
-//     for(let i = 0; i < iterator.length; i++) {
-//       Promise.resolve(iterator[i]).then(res => {
-//         resolve(res);
-//       })
-//     }
-//   })
-// }
+  result.promise = new myPromise((resolve, reject) => {
+    result.resolve = resolve;
+    result.reject = reject;
+  })
 
-// let p1 = new Promise((resove, reject) => {
-//   setTimeout(() => {
-//     resove(3);
-//   }, 3000);
-// });
+  return result;
+}
 
-// let p2 = new Promise((resove, reject) => {
-//   setTimeout(() => {
-//     resove(2);
-//   }, 2000);
-// });
-
-// let p3 = new Promise((resove, reject) => {
-//   setTimeout(() => {
-//     reject('error');
-//   }, 4000)
-// });
-
-// function* gen() {
-//   yield 1;
-//   yield 2;
-//   yield 3;
-// }
-
-// all(gen()).then(res => {
-//   console.log(res);
-// });
-
-// all([p1, p2]).then(res => {
-//   console.log(res);
-// });
-
-// all([p1, p3]).then(res => {
-//   console.log(res);
-// });
-
-// race([p1, p3]).then(res => {
-//   console.log(res);
-// });
+module.exports = myPromise;

@@ -1,0 +1,22 @@
+{
+  "name": "interview-question",
+  "version": "1.0.0",
+  "description": "",
+  "main": "implement/promise.js",
+  "scripts": {
+    "test": "promises-aplus-tests implement/promise.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ylg12345/interview-question.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ylg12345/interview-question/issues"
+  },
+  "homepage": "https://github.com/Ylg12345/interview-question#readme",
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  }
+}
