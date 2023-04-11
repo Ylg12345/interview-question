@@ -110,7 +110,7 @@ class myPromise {
     return promise2;
   }
 
-  catch (onRejected) {
+  catch(onRejected) {
     return this.then(undefined, onRejected)
   }
 
@@ -239,7 +239,7 @@ function resolvePromise(promise2, x, resolve, reject) {
                 reject(r);
             }
         )
-      }catch (error) {
+      } catch (error) {
         if (called) return;
         called = true;
         reject(error);
