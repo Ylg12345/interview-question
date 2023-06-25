@@ -11,10 +11,10 @@ Function.prototype.myBind = function(context, ...args) {
   const result = function(...innerArgs) {
     if(this instanceof _this === true) {
       this[fn] = _this;
-      this[fn](...[...args, ...innerArgs]);
+      this[fn](args.concat(innerArgs));
       delete this[fn];
     } else {
-      context[fn](...[...args, ...innerArgs]);
+      context[fn](args.concat(innerArgs));
       delete context[fn];
     }
   };
@@ -52,7 +52,7 @@ Function.prototype.myApply = function(context, args) {
 
   let result = null;
   context[fn] = this;
-  result = context[fn](args);
+  result = context[fn](...args);
   delete context[fn];
   return result;
 }

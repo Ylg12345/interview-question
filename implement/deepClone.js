@@ -1,15 +1,24 @@
 
 // 由于键值是对象，我们可以使用 Weakmap 利于内存回收
 
-const weakMap = new WeakMap()
-function deepClone(target) {
+function deepClone(target, weakMap = new WeakMap()) {
 
   if(target === null) return target;
   if(target instanceof Date) return new Date(target);
   if(target instanceof RegExp) return new RegExp(target);
+  if(target instanceof Array) return target; 
+
+  if(
+    target instanceof Map || 
+    target instanceof WeakMap || 
+    target instanceof Set ||
+    target instanceof WeakSet
+  ) {
+    return target;
+}
 
   if(typeof target === 'object') {
-    let cloneTarget = Array.isArray(target) ? [] : {};
+    let cloneTarget = {};
     if(weakMap.get(target)) {
       return weakMap.get(target);
     }
@@ -17,7 +26,7 @@ function deepClone(target) {
     weakMap.set(target, cloneTarget);
 
     for(const key in target) {
-      cloneTarget[key] = deepClone(target[key]);
+      cloneTarget[key] = deepClone(target[key], weakMap);
     }
 
     return cloneTarget;
