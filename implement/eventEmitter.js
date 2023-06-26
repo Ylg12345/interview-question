@@ -6,7 +6,7 @@ class EventEmitter {
   on(name, callback) {
     const callbacks = this._events[name] || [];
     callbacks.push(callback);
-    this._events[eventName] = callbacks;
+    this._events[name] = callbacks;
   }
 
   emit(name, ...args) {
@@ -21,7 +21,12 @@ class EventEmitter {
   }
 
   once(name, callback){
-    
+    const wrapperFn = (...args) => {
+      callback.apply(this, args);
+      this.off(name, wrapperFn);
+    }
+
+    this.on(name, wrapperFn);
   }
 }
 
@@ -31,8 +36,20 @@ events.on("newListener", function(eventName){
   console.log(`eventName`, eventName)
 })
 
-events.on("hello", function(){
-  console.log("hello");
-})
+const log = (val) => {
+  console.log(val);
+}
 
-events.emit("hello");
+events.on("hello", log)
+
+events.once("world", log);
+
+events.emit("hello", 1);
+
+events.off("hello", log)
+
+events.emit("hello", 2);
+
+events.emit("world", 1);
+
+events.emit("world", 2);
