@@ -47,4 +47,4 @@ function breakingMathing(str) {
   return false;
 }
 
-console.log(breakingMathing('(({))'));
+console.log(breakingMathing('(({}))'));

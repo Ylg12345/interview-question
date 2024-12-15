@@ -6,16 +6,15 @@ function deepClone(target, weakMap = new WeakMap()) {
   if(target === null) return target;
   if(target instanceof Date) return new Date(target);
   if(target instanceof RegExp) return new RegExp(target);
-  if(target instanceof Array) return target; 
 
-  if(
-    target instanceof Map || 
-    target instanceof WeakMap || 
-    target instanceof Set ||
-    target instanceof WeakSet
-  ) {
-    return target;
-}
+  // if(
+  //   target instanceof Map || 
+  //   target instanceof WeakMap || 
+  //   target instanceof Set ||
+  //   target instanceof WeakSet
+  // ) {
+  //   return target;
+  // }
 
   if(typeof target === 'object') {
     let cloneTarget = {};
@@ -43,7 +42,7 @@ const obj = {
   a: {
     b: [1, 2, 3],
     c: {
-      d: 4
+      d: 1
     }
   },
   e: function() {
@@ -54,6 +53,7 @@ const obj = {
   i: null
 }
 
-obj.self = obj;
+obj.a.c.f = obj.a;
+obj.a.c.j = obj.c;
 
 console.log(deepClone(obj));

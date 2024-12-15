@@ -7,11 +7,101 @@
   <title>Document</title>
 </head>
 <body>
-  
-  <!-- <input type="text" class="input">
+  <input type="text" class="input">
   <br>
-  <span class="name"></span> -->
+  <span class="name"></span>
+  <div id="root">
+  </div>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="./implement/form.js" type="text/babel"></script>
+  <!-- <script src="./implement/test.js"></script> -->
+  <div className="caculator">
+    <input type="text" id="display" disabled>
+    <button onclick="addNum(0)">0</button>
+    <button onclick="addNum(1)">1</button>
+    <button onclick="addNum(2)">2</button>
+    <button onclick="addNum(3)">3</button>
+    <button onclick="addNum(4)">4</button>
+    <button onclick="addNum(5)">5</button>
+    <button onclick="addNum(6)">6</button>
+    <button onclick="addNum(7)">7</button>
+    <button  onclick="addNum(8)">8</button>
+    <button onclick="addNum(9)">9</button>
+    <button onclick="addOperate('+')">+</button>
+    <button onclick="addOperate('-')">-</button>
+    <button onclick="addOperate('*')">*</button>
+    <button onclick="addOperate('/')">/</button>
+    <button onclick="clearDisplayValue()">C</button>
+  </div>
 
-  <script src="./implement/eventEmitter.js"></script>
+  <script>
+
+    const displayInput = document.getElementById('display');
+
+    let currentValue = '';
+    let previousValue = '';
+    let opeartion = null;
+    
+    function addNum(num) {
+      currentValue = currentValue + num;
+      if (previousValue === '') {
+        updateResult();
+      }
+
+      if (previousValue === '' || opeartion === null) return;
+      caculateResult();
+    }
+
+    function clearDisplayValue() {
+      currentValue = '';
+      previousValue = '';
+      opeartion = null;
+      displayInput.value = '';
+    }
+
+    function addOperate(opearte) {
+      opeartion = opearte;
+      previousValue = currentValue;
+      currentValue = '';
+    }
+
+    function caculateResult() {
+      let result;
+      const prev = Number(previousValue);
+      const curv = Number(currentValue);
+      if (isNaN(curv) || isNaN(prev)) return;
+      switch (opeartion) {
+        case '+' : {
+          result = prev + curv;
+          break;
+        }
+        case '-' : {
+          result = prev - curv;
+          break;
+        }
+        case '*' : {
+          result = prev * curv;
+          break;
+        }
+        case '/' : {
+          result = prev / curv;
+          break;
+        }
+        default:
+          return;
+      }
+
+      currentValue = result.toString();
+      opeartion = null;
+      previousValue = '';
+      updateResult();
+    }
+
+    function updateResult() {
+      displayInput.value = currentValue;
+    }
+  </script>
 </body>
 </html>

@@ -52,7 +52,7 @@ Function.prototype.myApply = function(context, args) {
 
   let result = null;
   context[fn] = this;
-  result = context[fn](...args);
+  result = context[fn]([...args]);
   delete context[fn];
   return result;
 }

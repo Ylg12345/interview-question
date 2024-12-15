@@ -31,21 +31,16 @@ function debounce(fn, wait, immediate) {
     if(timer) {
       clearInterval(timer);
     }
-
-    if(immediate) {
-      if(!timer) {
-        fn.apply(this, args);
-      }
-
-      timer = setTimeout(() => {
-        timer = null;
-        fn.apply(this, args);
-      }, wait);
-    } else {
-      timer = setTimeout(() => {
-        fn.apply(this, args);
-      }, wait);
+    if (immediate && !timer) {
+      fn.apply(this, args);
     }
+    timer = setTimeout(function() {
+      if (!immediate) {
+        fn.apply(this, args);
+      } else {
+        timer = null;
+      }
+    }, wait);
   }
 }
 
@@ -54,6 +49,7 @@ const span = document.querySelector('.name');
 const input = document.querySelector('.input');
 
 function changeName (e) {
+  console.log(444)
   span.innerHTML = e.target.value;
 };
 
