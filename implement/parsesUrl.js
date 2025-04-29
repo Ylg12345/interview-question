@@ -1,3 +1,9 @@
+
+/**
+ * 
+ * @param {string} url 
+ * @returns 
+ */
 function parseUrl(url) {
   const str = url.substr(url.indexOf('?') + 1);
 

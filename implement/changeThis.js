@@ -33,6 +33,8 @@ Function.prototype.myCall = function(context, ...args) {
     context = window;
   }
 
+  const fn = Symbol();
+
   let result = null;
   context[fn] = this;
   result = context[fn](...args);
@@ -50,9 +52,30 @@ Function.prototype.myApply = function(context, args) {
     context = window;
   }
 
+  const fn = Symbol();
+
   let result = null;
   context[fn] = this;
-  result = context[fn]([...args]);
+  result = context[fn](...args);
+  delete context[fn];
+  return result;
+}
+
+
+Function.prototype.myCall = function(context, ...args) {
+  if(typeof this !== 'function') {
+    throw new TypeError('call object is not a function')
+  }
+
+  if(!context && context === null) {
+    context = window;
+  }
+
+  const fn = Symbol();
+
+  let result = null;
+  context[fn] = this;
+  result = context[fn](...args);
   delete context[fn];
   return result;
 }

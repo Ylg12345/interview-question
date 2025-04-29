@@ -693,3 +693,41 @@ function add() {
 
 console.log(add(1)(2)(3)());
 console.log(add(1, 2, 3)(4)()); 
+
+/**
+ * 
+ * @param {string} s 
+ * @returns 
+ */
+function permute(s) {
+  if (s.length === 1) {
+      return [s];
+  }
+  let result = [];
+  for (let i = 0; i < s.length; i++) {
+      let char = s[i];
+      let remainingChars = s.slice(0, i) + s.slice(i + 1);
+      let subPermutations = permute(remainingChars);
+      for (let perm of subPermutations) {
+          result.push(char + perm);
+      }
+  }
+  return result;
+}
+
+let s = "abc";
+console.log(permute(s));
+
+
+
+
+
+
+
+function flattern (arr) {
+  return arr.reduce((prev, cur) => {
+    return prev.contact(Array.isArray(cur) ? flattern(cur) : cur);
+  }, []);
+}
+
+flattern([1, 2, [3, [4]], 5]);

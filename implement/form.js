@@ -24,7 +24,7 @@ const Form = React.forwardRef(({
         setValues(result);
       }
     }
-  }, []);
+  }, [values]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -130,6 +130,52 @@ Form.Item = Item;
 //   return secondsToTime(count);
 // }
 
+const Dropdown = ({ options, defaultValue, onChange }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedValue, setSelectedValue] = React.useState(defaultValue || '');
+  const dropdownRef = React.useRef(null);
+
+  // 点击外部关闭逻辑
+  React.useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // 受控组件支持[11](@ref)
+  const handleSelect = (value) => {
+    setSelectedValue(value);
+    onChange && onChange(value);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="dropdown" ref={dropdownRef}>
+      <div className="selected-value" onClick={() => setIsOpen(!isOpen)}>
+        {options.find(opt => opt.value === selectedValue) && options.find(opt => opt.value === selectedValue).label || '请选择'}
+      </div>
+      {isOpen && (
+        <div className="options-list">
+          {options.map(option => (
+            <div 
+              key={option.value}
+              className="option-item"
+              onClick={() => handleSelect(option.value)}
+            >
+              {option.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 const App = () => {
   const form = React.useRef(null);
   // const { hours, minutes, seconds } = useCountDown(
@@ -139,21 +185,22 @@ const App = () => {
   //   }
   // );
 
-  React.useEffect(() => {
-    form.current.setFieldsValue({
-      age: 26,
-      height: 180,
-      selectValue: '2',
-    })
-  }, []);
-
 
   return (
     <div>
       {/* {hours}:{minutes}:{seconds} */}
-      <Form 
+      <Dropdown 
+        options={[{label: '苹果', value: '苹果'}, {label: '香蕉', value: '香蕉'}]} 
+        onChange={(value) => { console.log('value', value) }} 
+        // defaultValue={'香蕉'}
+      />
+      {/* <Form 
         ref={form}
-        initialValues={{}}
+        initialValues={{
+          age: 26,
+          height: 180,
+          selectValue: '2',
+        }}
         onFinish={(values) => {
           console.log('values', values);
         }}
@@ -187,7 +234,7 @@ const App = () => {
           </select>
         </Form.Item>
         <button htmlType='submit'>提交</button>
-      </Form>
+      </Form> */}
     </div>
   );
 }
