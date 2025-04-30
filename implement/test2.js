@@ -1037,4 +1037,4 @@ function bigSum(a, b) {
   return result;
 }
 
-console.log(bigSum('1111111', '2222'));
+console.log(bigSum('1347911', '918722'));

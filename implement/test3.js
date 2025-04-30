@@ -471,21 +471,121 @@ addTask(400, '4')
 
 scheduler.start();
 
+/**
+ * 
+ * @param {string} s 
+ */
 function permute(s) {
   if (s.length === 1) {
-      return [s];
+    return [s];
   }
+
   let result = [];
-  for (let i = 0; i < s.length; i++) {
-      let char = s[i];
-      let remainingChars = s.slice(0, i) + s.slice(i + 1);
-      let subPermutations = permute(remainingChars);
-      for (let perm of subPermutations) {
-          result.push(char + perm);
-      }
+
+  for(let i = 0; i < s.length; i++) {
+    const char = s[i];
+    const remainingChars = s.slice(0, i) + s.slice(i + 1);
+    const subPermutations = permute(remainingChars);
+
+    for(const item of subPermutations) {
+      result.push(char + item);
+    }
   }
+
   return result;
 }
 
-let s = "abc";
+let s = "abcde";
 console.log(permute(s));
+
+/**
+ * 
+ * @param {string} a 
+ * @param {string} b 
+ */
+function bigSum(a, b) {
+  const len  = Math.max(a.length, b.length);
+  a = a.padStart(len, '0');
+  b = b.padStart(len, '0');
+
+  let cur = 0;
+  let result = '';
+
+  for(let i = len - 1; i >=0 ; i--) {
+    const n = Number(a[i]) + Number(b[i]) + cur;
+    cur = Math.floor(n / 10);
+    result = (n % 10) + result;
+  }
+
+  if (cur) {
+    result = '1' + result;
+  }
+
+  return result;
+}
+
+
+console.log(bigSum('2432', '32'));
+
+/**
+ * 
+ * @param {string} num1 
+ * @param {string} num2 
+ */
+function multiply(num1, num2) {
+  if (num1 == "0" || num2 == "0") return "0";
+
+  let arr = [];
+
+  // ​​逐位相乘
+  for(i = num1.length - 1; i >=0; i--) {
+    for(j = num2.length - 1; j >=0; j--) {
+      arr[i + j] = (arr[i + j] || 0) + num1[i] * num2[j];
+    }
+  }
+
+  // ​​进位处理​​
+  let carry = 0;
+  for(let i = arr.length - 1; i >=0; i--) {
+    let cur = arr[i] + carry;
+    arr[i] = cur % 10;
+    carry = Math.floor(cur / 10);
+  }
+
+  if (carry) {
+    arr.unshift(carry)
+  }
+
+  return arr.join('');
+}
+
+console.log('multiply', multiply('2500', '4'))
+
+/**
+ * 
+ * @param {string} a 
+ */
+function lengthOfLongestSubstring (s) {
+  let left = 0;
+  let right = 0;
+  let maxLen = 0;
+  const map = new Map();
+
+  while(right < s.length) {
+    const letter = s[right];
+    if (map.has(letter)) {
+      const lastPos = map.get(letter);
+      // left = lastPos +　1;
+      // 强制左指针单向移动
+      left = Math.max(left, lastPos + 1);
+    }
+
+    map.set(letter, right);
+    maxLen = Math.max(maxLen, right - left + 1);
+    right++;
+  }
+
+  return maxLen;
+}
+
+console.log('lengthOfLongestSubstring', lengthOfLongestSubstring('abcdabcbb'))

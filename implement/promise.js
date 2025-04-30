@@ -18,27 +18,23 @@ class myPromise {
 
   resolve(result) {
     if (this.promiseState === myPromise.PENDING) {
-      setTimeout(() => {
-        this.promiseState = myPromise.FULFILLED;
-        this.promiseResult = result;
-  
-        this.onFulfilledCallbacks.forEach(callback => {
-          callback(result);
-        });
-      })
+      this.promiseState = myPromise.FULFILLED;
+      this.promiseResult = result;
+
+      this.onFulfilledCallbacks.forEach(callback => {
+        callback(result);
+      });
     }
   }
 
   reject(reason) {
     if (this.promiseState === myPromise.PENDING) {
-      setTimeout(() => {
-        this.promiseState = myPromise.REJECTED;
-        this.promiseResult = reason;
-  
-        this.onRejectedCallbacks.forEach(callback => {
-          callback(reason);
-        })
-      });
+      this.promiseState = myPromise.REJECTED;
+      this.promiseResult = reason;
+
+      this.onRejectedCallbacks.forEach(callback => {
+        callback(reason);
+      })
     }
   }
 
@@ -78,25 +74,27 @@ class myPromise {
           }
         })
       } else if(this.promiseState === myPromise.PENDING) {
-        this.onFulfilledCallbacks.push(() => {
-          try {
-            if(typeof onFulfilled !== 'function') {
-              resolve(this.promiseResult);
-            } else {
-              let x = onFulfilled(this.promiseResult);
-              resolvePromise(promise2, x, resolve, reject);
+        this.onFulfilledCallbacks.push((result) => {
+          setTimeout(() => {
+            try {
+              if(typeof onFulfilled !== 'function') {
+                resolve(result);
+              } else {
+                let x = onFulfilled(result);
+                resolvePromise(promise2, x, resolve, reject);
+              }
+            } catch (error) {
+              reject(error);
             }
-          } catch (error) {
-            reject(error);
-          }
+          })
         });
-        this.onRejectedCallbacks.push(() => {
+        this.onRejectedCallbacks.push((reason) => {
           setTimeout(() => {
             try {
               if(typeof onRejected !== 'function') {
-                reject(this.promiseResult);
+                reject(reason);
               } else {
-                let x = onRejected(this.promiseResult);
+                let x = onRejected(reason);
                 resolvePromise(promise2, x, resolve, reject);
               }
             } catch (error) {
@@ -115,7 +113,10 @@ class myPromise {
   }
 
   finally(callBack) {
-    return this.then(callBack, callBack)
+    return this.then(
+      value => myPromise.resolve(callBack()).then(() => value),
+      reason => myPromise.resolve(callBack()).then(() => { throw reason; })
+    );
   }
 
   /**
@@ -263,4 +264,30 @@ myPromise.deferred = function() {
   return result;
 }
 
-module.exports = myPromise;
+// module.exports = myPromise;
+
+
+let p5 = new myPromise((resove, reject) => {
+  setTimeout(() => {
+    resove(3);
+  }, 5000);
+});
+
+let p4 = new myPromise((resove, reject) => {
+  setTimeout(() => {
+    resove(2);
+  }, 2000);
+});
+
+let p3 = new myPromise((resove, reject) => {
+  setTimeout(() => {
+    reject('error');
+  }, 4000)
+});
+
+
+myPromise.all([p5, p4, p4, p3]).then(res => {
+  console.log('myPromise res', res);
+}).catch((err) => {
+  console.log('err', err)
+});
