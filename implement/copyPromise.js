@@ -5,37 +5,38 @@ class copyMyPromise {
   static REJECTED = 'REJECTED';
 
   constructor(executor) {
-    this.promiseState = copyMyPromise.PENDING;
-    this.promiseResult = null;
+    this.status = copyMyPromise.PENDING;
+    this.value = null;
+    this.reason = null;
     this.onFulfilledCallbacks = [];
     this.onRejectedCallbacks = [];
 
+    let resolve = (result) => {
+      if (this.status === copyMyPromise.PENDING) {
+        this.status = copyMyPromise.FULFILLED;
+        this.promiseResult = result;
+        this.onFulfilledCallbacks((callback) => {
+          callback(result);
+        })
+      }
+    }
+  
+    let reject = (reason) => {
+      if (this.status === copyMyPromise.PENDING) {
+        this.status = copyMyPromise.REJECTED;
+        this.promiseResult = reason;
+        this.onRejectedCallbacks((callback) => {
+          callback(reason);
+        })
+      }
+    }
+
     try {
-      executor(this.resolve.bind(this), this.reject.bind(this));
+      executor(resolve, reject);
     } catch(err) {
       this.reject(error);
     }
 
-  }
-
-  resolve(result) {
-    if (this.promiseState === copyMyPromise.PENDING) {
-      this.promiseState = copyMyPromise.FULFILLED;
-      this.promiseResult = result;
-      this.onFulfilledCallbacks((callback) => {
-        callback(result);
-      })
-    }
-  }
-
-  reject(reason) {
-    if (this.promiseState === copyMyPromise.PENDING) {
-      this.promiseState = copyMyPromise.REJECTED;
-      this.promiseResult = reason;
-      this.onRejectedCallbacks((callback) => {
-        callback(reason);
-      })
-    }
   }
 
   /**

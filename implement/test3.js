@@ -588,4 +588,35 @@ function lengthOfLongestSubstring (s) {
   return maxLen;
 }
 
-console.log('lengthOfLongestSubstring', lengthOfLongestSubstring('abcdabcbb'))
+console.log('lengthOfLongestSubstring', lengthOfLongestSubstring('abcdabcbb'));
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const images = document.querySelectorAll('img[data-src]');
+
+  const loadImg = (image) => {
+    image.setAttribute('src', image.getAttribute('data-src'));
+    image.onload = function() {
+      image.removeAttribute('data-src');
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(function(items, observer) { 
+      items.forEach((item) => {
+        if (item.isIntersecting) {
+          loadImg(item.target);
+          observer.unobserve(item.target);
+        }
+      });
+    }, { threshold: 0.01 });
+
+    images.forEach((image) => {
+      observer.observe(image);
+    })
+  } else {
+    images.forEach((image) => {
+      loadImg(image);
+    })
+  }
+})

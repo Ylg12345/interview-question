@@ -175,6 +175,85 @@ const Dropdown = ({ options, defaultValue, onChange }) => {
   );
 };
 
+const useLazyImage = ({
+  dataSrc,
+  placeholderSrc
+}) => {
+
+  const [src, setSrc] = React.useState(placeholderSrc);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isError, setIsError] = React.useState(false);
+  const imageRef = React.useRef(null);
+
+  const loadImg = React.useCallback(() => {
+    const image = new Image();
+    image.src = dataSrc;
+
+    image.onload = function() {
+      setSrc(dataSrc);
+      setIsLoading(false);
+    }
+
+    image.onerror = function() {
+      setIsError(true);
+      setIsLoading(false);
+    }
+
+  }, [dataSrc]);
+
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          loadImg();
+          observer.unobserve(entry.target);
+        }
+      })
+    }, {
+      root: null,
+      rootMargin: '200px',
+      threshold: 0.01,
+    })
+
+    if (imageRef.current) {
+      observer.observe(imageRef.current);
+    }
+
+    return () => {
+      if (imageRef.current) {
+        observer.unobserve(imageRef.current);
+      }
+    }
+
+  }, []);
+
+  return {
+    imageRef,
+    src,
+    isLoading,
+    isError,
+  }
+}
+
+const LazyImage = ({ dataSrc, placeholderSrc }) => {
+  const { imageRef, src, isLoading, isError } = useLazyImage({
+    dataSrc,
+    placeholderSrc
+  });
+
+  return (
+    <img 
+      ref={imageRef}
+      src={src}
+      style={{
+        opactiy: isLoading ? 0.5 : 1,
+        transition: 'opactiy 0.3s ease-in-out'
+      }}
+    />
+  )
+}
+
 
 const App = () => {
   const form = React.useRef(null);
@@ -194,7 +273,7 @@ const App = () => {
         onChange={(value) => { console.log('value', value) }} 
         // defaultValue={'香蕉'}
       />
-      {/* <Form 
+      <Form 
         ref={form}
         initialValues={{
           age: 26,
@@ -234,7 +313,7 @@ const App = () => {
           </select>
         </Form.Item>
         <button htmlType='submit'>提交</button>
-      </Form> */}
+      </Form>
     </div>
   );
 }

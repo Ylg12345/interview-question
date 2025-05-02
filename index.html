@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
 </head>
+
 <body>
   <input type="text" class="input">
   <br>
   <span class="name"></span>
   <div id="root">
   </div>
+  <div style="display: flex; flex-direction: column;">
+    <img style="width: 300px; height: 300px;" data-src="https://tse2-mm.cn.bing.net/th/id/OIP-C.tcBOK2LgAEgwFl0iTlF-uAHaEa?rs=1&pid=ImgDetMain" alt="" />
+    <img style="width: 300px; height: 300px;" data-src="https://tse2-mm.cn.bing.net/th/id/OIP-C.tcBOK2LgAEgwFl0iTlF-uAHaEa?rs=1&pid=ImgDetMain" alt="" />
+    <img style="width: 300px; height: 300px;" data-src="https://tse2-mm.cn.bing.net/th/id/OIP-C.tcBOK2LgAEgwFl0iTlF-uAHaEa?rs=1&pid=ImgDetMain" alt="" />
+    <img style="width: 300px; height: 300px;" data-src="https://tse2-mm.cn.bing.net/th/id/OIP-C.tcBOK2LgAEgwFl0iTlF-uAHaEa?rs=1&pid=ImgDetMain" alt="" />
+    <img style="width: 300px; height: 300px;" data-src="https://tse2-mm.cn.bing.net/th/id/OIP-C.tcBOK2LgAEgwFl0iTlF-uAHaEa?rs=1&pid=ImgDetMain" alt="" />
+    <img style="width: 300px; height: 300px;" data-src="https://tse2-mm.cn.bing.net/th/id/OIP-C.tcBOK2LgAEgwFl0iTlF-uAHaEa?rs=1&pid=ImgDetMain" alt="" />
+  </div>
+
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script src="./implement/form.js" type="text/babel"></script>
-  <!-- <script src="./implement/test3.js"></script> -->
-  <script src="./implement//promise.js"></script>
+  <script src="./implement/test3.js"></script>
+  <!-- <script src="./implement/promise.js"></script> -->
   <!-- <script src="./implement//reverseArr.js"></script> -->
   <!-- <script src="./implement/test.js"></script> -->
   <!-- <div className="caculator">
@@ -46,7 +57,7 @@
     let currentValue = '';
     let previousValue = '';
     let opeartion = null;
-    
+
     function addNum(num) {
       currentValue = currentValue + num;
       if (previousValue === '') {
@@ -76,19 +87,19 @@
       const curv = Number(currentValue);
       if (isNaN(curv) || isNaN(prev)) return;
       switch (opeartion) {
-        case '+' : {
+        case '+': {
           result = prev + curv;
           break;
         }
-        case '-' : {
+        case '-': {
           result = prev - curv;
           break;
         }
-        case '*' : {
+        case '*': {
           result = prev * curv;
           break;
         }
-        case '/' : {
+        case '/': {
           result = prev / curv;
           break;
         }
@@ -107,4 +118,5 @@
     }
   </script>
 </body>
+
 </html>

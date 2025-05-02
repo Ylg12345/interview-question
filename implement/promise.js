@@ -3,38 +3,37 @@ class myPromise {
   static FULFILLED = 'FULFILLED';
   static REJECTED = 'REJECTED';
 
-  constructor(func) {
-    this.promiseState = myPromise.PENDING;
-    this.promiseResult = null;
+  constructor(executor) {
+    this.status = myPromise.PENDING;
+    this.value = null;
+    this.reason = null;
     this.onFulfilledCallbacks = []; 
     this.onRejectedCallbacks = []; 
 
+    let resolve = (result) => {
+      if (this.status === copyMyPromise.PENDING) {
+        this.status = copyMyPromise.FULFILLED;
+        this.promiseResult = result;
+        this.onFulfilledCallbacks((callback) => {
+          callback(result);
+        })
+      }
+    }
+  
+    let reject = (reason) => {
+      if (this.status === copyMyPromise.PENDING) {
+        this.status = copyMyPromise.REJECTED;
+        this.promiseResult = reason;
+        this.onRejectedCallbacks((callback) => {
+          callback(reason);
+        })
+      }
+    }
+
     try {
-      func(this.resolve.bind(this), this.reject.bind(this));
+      executor(resolve, reject);
     } catch(error) {
       this.reject(error);
-    }
-  }
-
-  resolve(result) {
-    if (this.promiseState === myPromise.PENDING) {
-      this.promiseState = myPromise.FULFILLED;
-      this.promiseResult = result;
-
-      this.onFulfilledCallbacks.forEach(callback => {
-        callback(result);
-      });
-    }
-  }
-
-  reject(reason) {
-    if (this.promiseState === myPromise.PENDING) {
-      this.promiseState = myPromise.REJECTED;
-      this.promiseResult = reason;
-
-      this.onRejectedCallbacks.forEach(callback => {
-        callback(reason);
-      })
     }
   }
 
@@ -46,43 +45,33 @@ class myPromise {
    */
 
   then(onFulfilled, onRejected) {
+    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value;
+    onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw reason };
     const promise2 = new myPromise((resolve, reject) => {
-      if(this.promiseState === myPromise.FULFILLED) {
+      if(this.status === myPromise.FULFILLED) {
         setTimeout(() => {
           try {
-            if(typeof onFulfilled !== 'function') {
-              resolve(this.promiseResult);
-            } else {
-              let x = onFulfilled(this.promiseResult);
-              resolvePromise(promise2, x, resolve, reject);
-            }
+            let x = onFulfilled(this.value);
+            resolvePromise(promise2, x, resolve, reject);
           } catch (error) {
             reject(error);
           }
         })
-      } else if(this.promiseState === myPromise.REJECTED) {
+      } else if(this.status === myPromise.REJECTED) {
         setTimeout(() => {
           try {
-            if(typeof onRejected !== 'function') {
-              reject(this.promiseResult);
-            } else {
-              let x = onRejected(this.promiseResult);
-              resolvePromise(promise2, x, resolve, reject);
-            }
+            let x = onRejected(this.reason);
+            resolvePromise(promise2, x, resolve, reject);
           } catch (error) {
             reject(error);
           }
         })
-      } else if(this.promiseState === myPromise.PENDING) {
-        this.onFulfilledCallbacks.push((result) => {
+      } else if(this.status === myPromise.PENDING) {
+        this.onFulfilledCallbacks.push(() => {
           setTimeout(() => {
             try {
-              if(typeof onFulfilled !== 'function') {
-                resolve(result);
-              } else {
-                let x = onFulfilled(result);
-                resolvePromise(promise2, x, resolve, reject);
-              }
+              let x = onFulfilled(this.value);
+              resolvePromise(promise2, x, resolve, reject);
             } catch (error) {
               reject(error);
             }
@@ -91,12 +80,8 @@ class myPromise {
         this.onRejectedCallbacks.push((reason) => {
           setTimeout(() => {
             try {
-              if(typeof onRejected !== 'function') {
-                reject(reason);
-              } else {
-                let x = onRejected(reason);
-                resolvePromise(promise2, x, resolve, reject);
-              }
+              let x = onRejected(this.reason);
+              resolvePromise(promise2, x, resolve, reject);
             } catch (error) {
               reject(error);
             }
