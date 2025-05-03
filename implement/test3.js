@@ -561,6 +561,12 @@ function multiply(num1, num2) {
 
 console.log('multiply', multiply('2500', '4'))
 
+
+/**
+ * 如果将循环条件改为`right <= s.length`。这会导致right指针的取值范围从原来的0到s.length-1，变为0到s.length。
+ * 也就是说，当right等于s.length时，循环还会执行一次。这个时候，s[right]会是undefined，因为字符串的索引从0到length-1
+ */
+
 /**
  * 
  * @param {string} a 
@@ -620,3 +626,98 @@ document.addEventListener('DOMContentLoaded', function() {
     })
   }
 })
+
+
+let arr6 = [];
+for(let i = 0; i < 10; i++) {
+  arr6[i] = function() {
+    console.log('i test', i)
+  }
+}
+
+arr6[6]()
+
+
+class Node {
+  constructor(key, val) {
+    this.key = key;
+    this.val = val;
+    this.prev = null;
+    this.next = null;
+  }
+}
+
+class LRUCache {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.cache = new Map();
+    this.head = new Node(0, 0);
+    this.tail = new Node(0, 0);
+    this.head.next = this.tail;
+    this.tail.prev = this.head;
+  }
+
+  _addToHead(node) {
+    node.next = this.head.next;
+    node.prev = this.head;
+    this.head.next.prev = node;
+    this.head.next = node;
+  }
+
+  _removeNode(node) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+  }
+
+  get(key) {
+    if (!this.cache.has(key)) return -1;
+    const node = this.cache.get(key);
+    this._removeNode(node);
+    this._addToHead(node);
+    return node.val;
+  }
+
+  put(key, val) {
+    if (this.cache.has(key)) {
+      const node = this.cache.get(key);
+      node.val = val;
+      this._removeNode(node);
+      this._addToHead(node);
+    } else {
+      if (this.cache.size >= this.capacity) {
+        const oldLeastNode = this.tail.prev;
+        this._removeNode(oldLeastNode);
+        this.cache.delete(oldLeastNode.key);
+      }
+
+      const newNode = new Node(key, val);
+      this.cache.set(key, newNode);
+      this._addToHead(newNode);
+    }
+  }
+
+  getHead() {
+    return this.head;
+  }
+}
+
+const lru = new LRUCache(2);
+
+lru.put('a', 1);
+lru.put('b', 1);
+
+lru.get('a');
+
+
+const b = lru.get('b');
+
+console.log('b', b);
+
+console.log('head', lru.getHead());
+
+
+
+
+
+
+
